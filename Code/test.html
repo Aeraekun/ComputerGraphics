@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <style>
+            #gl-canvas {
+                background: url(../Graphic/startBackground1.png) center center / cover no-repeat;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100vh;
+            }
+        </style>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             uniform vec4 vColor;
