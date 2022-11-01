@@ -1,24 +1,3 @@
-var canvas;
-var gl;
-var program;
-
-var scene;
-var renderer;
-var loader = new THREE.GLTFLoader();
-var camera;
-
-raycaster = new THREE.Raycaster();
-mouse = new THREE.Vector2();
-
-var rectangle = [];
-var mainShapeObject;
-
-var animationObject = [];
-var animationDestinationVector = [];
-var animationMovingVector = [];
-
-var alreadyIn = false;
-
 window.onload = function init(){
 	const canvas = document.getElementById( "gl-canvas" );
 	canvas.width = window.innerWidth;
@@ -26,144 +5,273 @@ window.onload = function init(){
 
 	renderer = new THREE.WebGLRenderer({canvas});
 	renderer.setSize(canvas.width,canvas.height);
-    renderer.domElement.addEventListener('click', onClick, false);
 
-	scene = new THREE.Scene();
-	scene.background = new THREE.Color(0x000000);
-
-
-	camera = new THREE.PerspectiveCamera(75,canvas.width / canvas.height,0.1, 1000);
-	camera.position.y = 30;
-    camera.rotation.x = -1.5;
-
-	hlight = new THREE.AmbientLight (0x404040,10);
-	scene.add(hlight);
+	camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,0.1, 1000);
     
-    const controls = new THREE.OrbitControls( camera, renderer.domElement );
-    controls.update();
+    Game = new Game(canvas,camera,renderer);
 
-    //If you want to test other shapes, you can choose the load function you want
+    Game.loadSquare();
+    //Game.loadPentagon();
+    //Game.loadTriangle();
+
+    Game.animate();
+}
+
+class Game{
+    constructor(canvas,camera,renderer){
+        this._canvas = canvas;
+        this._camera = camera;
+        this._camera.position.y = 30;
+        this._camera.rotation.x = -1.5;
+        this._renderer = renderer;
+        this._renderer.domElement.addEventListener('click', this.onClick.bind(this), false);
+
+        const scene = new THREE.Scene();
+        this._scene = scene;
+        this._scene.background = new THREE.Color(0x000000);
+        this.loader = new THREE.GLTFLoader();
+
+        window.onresize = this.resize.bind(this);
+
+        this.controls = new THREE.OrbitControls(this._camera, this._renderer.domElement );
+        this.controls.update();
+
+	    this.hlight = new THREE.AmbientLight (0x404040,10);
+	    this._scene.add(this.hlight);
+
+        this.frameId;
+
+        this.particleObject = [];
+
+        this.rectangle = [];
+        this.mainShapeObject;
+
+        this.animationObject = [];
+        this.animationDestinationVector = [];
+        this.animationMovingVector = [];
+        this.animationParticle = [];
+
+        this.alreadyIn = false;
+
+        this.loadParticle();
+        this.setupBackground();
+
+        this.stoped = false;
+    }
+
+    loadSquare(){
+        for(var i=1; i<10; i++){
+            var url = '../Graphic/model/sugarRec*.gltf'
+            if(i==9)setTimeout(() => this.loadPiece(url.replace('*',String(9))), 300);
+            else this.loadPiece(url.replace('*',String(i)));
+        }
+    }
+
+    loadTriangle(){
+        for(var i=1; i<5; i++){
+            var url = '../Graphic/model/sugarTri*.gltf'
+            if(i==4)setTimeout(() => this.loadPiece(url.replace('*',String(4))), 300);
+            else this.loadPiece(url.replace('*',String(i)));
+        }
+    }
     
-    //loadPolygon();
-    //loadTriangle(); need modify 
-    loadSquare();
-
-    animate();
-}
-
-function animate() {
-    renderer.render(scene,camera);
-    moveAnimation();
-    rotateAnimation();
-    fadeOutAnimation();
-    if(rectangle.length == 1)finallAnimation();
-    requestAnimationFrame(animate);
-}
-
-function loadSquare(){
-    for(i=1; i<10; i++){
-        var url = '../Graphic/model/rec*.gltf'
-	        loader.load(url.replace('*',String(i)), function(gltf){
-	            gltf.scene.children[0].scale.set(10,10,10);
-	            scene.add(gltf.scene);
-                rectangle.push(gltf.scene.children[0].id);
-                mainShapeObject = gltf.scene.children[0];
-	        },  undefined, function (error) {
-                console.log(error);
-	    });
-    }
-}
-
-function loadTriangle(){
-    for(i=1; i<5; i++){
-        var url = '../Graphic/model/sugartri*.gltf'
-	        loader.load(url.replace('*',String(i)), function(gltf){
-	            gltf.scene.children[0].scale.set(10,10,10);
-	            scene.add(gltf.scene);
-                rectangle.push(gltf.scene.children[0].id);
-                mainShapeObject = gltf.scene.children[0];
-	        },  undefined, function (error) {
-                console.log(error);
-	    });
-    }
-}
-
-function loadPolygon(){
-    for(i=1; i<7; i++){
-        var url = '../Graphic/model/sugarpoly*.gltf'
-	        loader.load(url.replace('*',String(i)), function(gltf){
-	            gltf.scene.children[0].scale.set(10,10,10);
-	            scene.add(gltf.scene);
-                rectangle.push(gltf.scene.children[0].id);
-                console.log(i);
-                mainShapeObject = gltf.scene.children[0];
-	        },  undefined, function (error) {
-                console.log(error);
-	    });
-    }
-}
-
-function onClick() {
-    event.preventDefault();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
-    var intersects = raycaster.intersectObjects(scene.children, true);
-    if (intersects.length > 0) {
-        clickedPosition = new THREE.Vector3(intersects[0].point.x,intersects[0].point.y,intersects[0].point.z);
-        cameraPosition = new THREE.Vector3(camera.position.x,camera.position.y,camera.position.z);
-
-        vectorToMove = clickedPosition.sub(cameraPosition).normalize().multiplyScalar(20);
-        objectToMove = intersects[0].object;
-
-        animationObject.forEach((object) =>{if(objectToMove.id == object.id)alreadyIn = true;});
-        if(!alreadyIn && !(objectToMove.id == mainShapeObject.id)){
-            animationObject.push(objectToMove);
-            animationDestinationVector.push(objectToMove.clone().position.add(vectorToMove.clone().normalize()).add(vectorToMove).ceil());
-            animationMovingVector.push(vectorToMove.normalize());
+    loadPentagon(){
+        for(var i=1; i<7; i++){
+            var url = '../Graphic/model/sugarpoly*.gltf'
+            if(i==6)setTimeout(() => this.loadPiece(url.replace('*',String(6))), 300);
+            else this.loadPiece(url.replace('*',String(i)));
         }
-        alreadyIn = false;
+    }
+
+    loadParticle(){
+        for(var i=0; i<10; i++){
+            var url = '../Graphic/model/sugarRec1.gltf'
+                this.loader.load((url), (gltf)=>{
+                    var object = gltf.scene.children[0];
+                    object.scale.set(3,3,3);
+                    object.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
+                    object.visible = false;
+                    this._scene.add(gltf.scene);
+                    this.particleObject.push(object);
+                },  undefined, function (error) {
+                    console.log(error);
+            });
+        }
+    }
+    
+    loadPiece(url){
+        this.loader.load(url, (gltf)=>{
+            gltf.scene.children[0].scale.set(10,10,10);
+            this._scene.add(gltf.scene);
+            this.rectangle.push(gltf.scene.children[0].id);
+            this.mainShapeObject = gltf.scene.children[0];
+        },  undefined, function (error) {
+            console.log(error);
+        });
+    }
+
+    onClick() {
+        event.preventDefault();
+        var mouse = new THREE.Vector2();
+        var raycaster = new THREE.Raycaster();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, this._camera);
+        var intersects = raycaster.intersectObjects(this._scene.children, true);
+        if (intersects.length > 0) {
+            var clickedPosition = new THREE.Vector3(intersects[0].point.x,intersects[0].point.y,intersects[0].point.z);
+            var cameraPosition = new THREE.Vector3(this._camera.position.x,this._camera.position.y,this._camera.position.z);
+    
+            var vectorToMove = clickedPosition.clone().sub(cameraPosition).normalize().multiplyScalar(20);
+            var objectToMove = intersects[0].object;
+    
+            this.animationObject.forEach((object) =>{if(objectToMove.id == object.id)this.alreadyIn = true;});
+            if(!this.alreadyIn && !(objectToMove.id == this.mainShapeObject.id)){
+                this.prepareParticle(clickedPosition);
+                this.animationObject.push(objectToMove);
+                this.animationDestinationVector.push(objectToMove.clone().position.add(vectorToMove.clone().normalize()).add(vectorToMove).ceil());
+                this.animationMovingVector.push(vectorToMove.normalize());
+            }
+            this.alreadyIn = false;
+        }
+
+        if(this.rectangle.length == 1){
+            this.exit();
+            this.ended = true;
+        }
+    }
+
+    moveAnimation() {
+        this.animationObject.forEach((object,index) =>{
+            if (!this.animationDestinationVector[index].equals(object.clone().position.ceil())) {
+                object.position.add(this.animationMovingVector[index]);
+            }else{
+                this.animationObject[index].visible=false;
+                this.rectangle = this.rectangle.filter((element) => element != this.animationObject[index].id);
+                this.animationObject.splice(index,1);
+                this.animationDestinationVector.splice(index,1);
+                this.animationMovingVector.splice(index,1);
+                this.animationParticle.splice(index,1);
+            }
+        });
+    }
+
+    rotateAnimation() {
+        this.animationObject.forEach((object) =>{
+            var box = new THREE.Box3().setFromObject( object );
+            var offset = new THREE.Vector3();
+            box.getCenter(offset);
+            if(Math.abs(offset.x)>Math.abs(offset.z)){
+                object.rotation.z -= 0.1;
+            }else{
+                object.rotation.x += 0.1;
+            }
+        });
+    }
+    
+    fadeOutAnimation() {
+        this.animationObject.forEach((object) =>{
+            object.material.transparent = true;
+            object.material.opacity -= 0.03;
+            object.material.format = THREE.RGBAFormat
+        });
+    }
+    
+    finallAnimation() {
+        this._camera.position.set(0,30,0);
+        this._camera.rotation.set(-1.5,0,0);
+        this.mainShapeObject.rotation.z -= 0.1;
+    }
+    
+    prepareParticle(clickedPosition) {
+        var particle = [];
+        this.particleObject.forEach((object) =>{
+            var temp = object.clone();
+            temp.position.add(clickedPosition);
+            temp.material = new THREE.MeshStandardMaterial();
+            temp.material.copy(object.material);
+            temp.material.needsUpdate = true;
+            particle.push(temp);
+        });
+        this.animationParticle.push(particle);
+    }
+    
+    particleAnimation() {
+        this.animationObject.forEach((list,index) =>{
+            var cameraPosition = new THREE.Vector3(this._camera.position.x,this._camera.position.y,this._camera.position.z).normalize();
+            this.animationParticle[index].forEach((object) =>{
+                object.position.add(cameraPosition);
+                var ramdomMoveVector = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5);
+                object.position.add(ramdomMoveVector);
+                object.material.format = THREE.RGBAFormat;
+                object.material.transparent = true;
+                object.material.opacity -= 0.20;
+                object.visible = true;
+                this._scene.add(object);
+            });
+        });
+    }
+
+    exit(){
+        cancelAnimationFrame(this.frameId);
+        while(this._scene.children.length > 0){
+            this._scene.remove(this._scene.children[0]);
+        }
+    }
+
+    animate() {
+        this._renderer.render(this._scene,this._camera);
+        this.moveAnimation();
+        this.rotateAnimation();
+        this.fadeOutAnimation();
+        this.particleAnimation();
+        if(this.rectangle.length == 1)this.finallAnimation();
+        this.frameId = requestAnimationFrame(this.animate.bind(this));
+    }
+
+    resize(){
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        this._camera.aspect = width / height;
+        this._camera.updateProjectionMatrix();
+
+        this._renderer.setSize(width, height);
+
+        const backgroundTexture = this._scene.background;
+        if(backgroundTexture) {
+            const divAspect = width / height;
+            const img = backgroundTexture.image;
+            const bgAspect = img.width / img.height;
+            const aspect = bgAspect / divAspect;
+
+            backgroundTexture.offset.x = aspect > 1 ? (1 - 1 / aspect) / 2 : 0;
+            backgroundTexture.repeat.x = aspect > 1 ? 1 / aspect : 1;
+            backgroundTexture.offset.y = aspect > 1 ? 0 : (1 - aspect) / 2;
+            backgroundTexture.repeat.y = aspect > 1 ? 1 : aspect;
+        }
+    }
+    
+    setupBackground() {
+        //https://www.humus.name/index.php?page=Textures&start=56
+        var backgroundList = [["../Background/Maskonaive2/posx.jpg",
+                                "../Background/Maskonaive2/negx.jpg", 
+                                "../Background/Maskonaive2/posy.jpg",
+                                "../Background/Maskonaive2/negy.jpg",
+                                "../Background/Maskonaive2/posz.jpg",
+                                "../Background/Maskonaive2/negz.jpg"],
+                            '../Background/image.jpg',
+                            '../Background/cannon.jpeg'
+        ];
+        var numOfBackground = 3;
+        var ramdomTextureNumber = Math.round((Math.random()*(numOfBackground-1)));
+
+        var textureLoader = new THREE.TextureLoader();
+        if(Array.isArray(backgroundList[ramdomTextureNumber])) textureLoader = new THREE.CubeTextureLoader();
+
+        textureLoader.load(backgroundList[ramdomTextureNumber], texture => {
+            this._scene.background = texture;
+            this.resize();
+        });
     }
 }
-
-function moveAnimation() {
-    animationObject.forEach((object,index) =>{
-        if (!animationDestinationVector[index].equals(object.clone().position.ceil())) {
-            object.position.add(animationMovingVector[index]);
-        }else{
-            animationObject[index].visible=false;
-            rectangle = rectangle.filter((element) => element != animationObject[index].id);
-            animationObject.splice(index,1);
-            animationDestinationVector.splice(index,1);
-            animationMovingVector.splice(index,1);
-        }
-    });
-}
-
-function rotateAnimation() {
-    animationObject.forEach((object) =>{
-        box = new THREE.Box3().setFromObject( object );
-        offset = new THREE.Vector3();
-        box.getCenter(offset);
-        if(Math.abs(offset.x)>Math.abs(offset.z)){
-            object.rotation.z -= 0.1;
-        }else{
-            object.rotation.x += 0.1;
-        }
-    });
-}
-
-function fadeOutAnimation() {
-    animationObject.forEach((object) =>{
-        object.material.transparent = true;
-        object.material.opacity -= 0.03;
-        object.material.format = THREE.RGBAFormat
-    });
-}
-
-function finallAnimation() {
-	camera.position.set(0,30,0);
-    camera.rotation.set(-1.5,0,0);
-    mainShapeObject.rotation.z -= 0.1;
-}
-
