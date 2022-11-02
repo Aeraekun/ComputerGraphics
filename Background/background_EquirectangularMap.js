@@ -36,7 +36,7 @@ class App {
     // https://polyhaven.com/hdris
     _setupBackground() {
         const loader = new THREE.TextureLoader();
-        loader.load("./data/cannon.jpeg", texture => {
+        loader.load("./data/wooden_lounge_4k.exr", texture => {
             const renderTarget = new THREE.WebGLCubeRenderTarget(texture.image.height);
             renderTarget.fromEquirectangularTexture(this._renderer, texture);
             this._scene.background = renderTarget.texture;
