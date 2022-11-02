@@ -326,24 +326,24 @@ class Game{
     
     setupBackground() {
         //https://www.humus.name/index.php?page=Textures&start=56
-        var backgroundList = [["../Background/Maskonaive2/posx.jpg",
-                                "../Background/Maskonaive2/negx.jpg", 
-                                "../Background/Maskonaive2/posy.jpg",
-                                "../Background/Maskonaive2/negy.jpg",
-                                "../Background/Maskonaive2/posz.jpg",
-                                "../Background/Maskonaive2/negz.jpg"],
-                            '../Background/image.jpg',
-                            '../Background/cannon.jpeg'
-        ];
-        var numOfBackground = 3;
-        var ramdomTextureNumber = Math.round((Math.random()*(numOfBackground-1)));
+        var backgroundList = [
+                            '../Background/data/1.jpg',
+                            '../Background/data/2.jpg',
+                            '../Background/data/3.jpg',
+                            '../Background/data/4.jpg',
+                            '../Background/data/5.jpg',
+                            '../Background/data/6.jpg',
 
+        ];
+        var numOfBackground = 6;
+        var ramdomTextureNumber = Math.round((Math.random()*(numOfBackground-1)));
         var textureLoader = new THREE.TextureLoader();
-        if(Array.isArray(backgroundList[ramdomTextureNumber])) textureLoader = new THREE.CubeTextureLoader();
 
         textureLoader.load(backgroundList[ramdomTextureNumber], texture => {
-            this._scene.background = texture;
-            this.resize();
+
+            const renderTarget = new THREE.WebGLCubeRenderTarget(texture.image.height);
+            renderTarget.fromEquirectangularTexture(this._renderer, texture);
+            this._scene.background = renderTarget.texture;
         });
     }
 }
