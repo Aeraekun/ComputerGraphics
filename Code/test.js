@@ -17,15 +17,23 @@ window.onload = function init(){
     Game.animate();
 }
 
+//Encapsulated game logic class
 class Game{
+
+	//Receive Canvas, Camera, and Render used in existing programs as parameters
     constructor(canvas,camera,renderer){
+        //Store the augments inside the class
         this._canvas = canvas;
         this._camera = camera;
         this._camera.position.y = 30;
         this._camera.rotation.x = -1.5;
         this._renderer = renderer;
-        this._renderer.domElement.addEventListener('click', this.onClick.bind(this), false);
 
+        //Add listener, pointmove is later used for hover events using raycaster
+        this._renderer.domElement.addEventListener('pointerdown', this.onClick.bind(this));
+        this._renderer.domElement.addEventListener('pointermove', this.onMove.bind(this));
+
+        //Scene is declared separately inside the class to avoid touching the scene used outside
         const scene = new THREE.Scene();
         this._scene = scene;
         this._scene.background = new THREE.Color(0x000000);
@@ -39,13 +47,21 @@ class Game{
 	    this.hlight = new THREE.AmbientLight (0x404040,10);
 	    this._scene.add(this.hlight);
 
+        //Variables
+        this.mouse = new THREE.Vector2();
+        this.raycaster = new THREE.Raycaster();
+
         this.frameId;
 
         this.particleObject = [];
 
-        this.rectangle = [];
+        this.objectId = [];
         this.mainShapeObject;
 
+        //The animationObject stores the object for which the animation should occur
+        //The animationDestinationVector stores the vector where the animationObject should finally arrive
+        //The animationMovingVector stores vectors that need to be added to the animationObject to reach the animationDestinationVector
+        //The animationParticle stores the copied particles near the coordinates where the animationObject is clicked
         this.animationObject = [];
         this.animationDestinationVector = [];
         this.animationMovingVector = [];
@@ -53,36 +69,40 @@ class Game{
 
         this.alreadyIn = false;
 
+        //Variable that allow external confirmation that this game is over
+        this.stoped = false;
+
+        //Basic Preparation
         this.loadParticle();
         this.setupBackground();
-
-        this.stoped = false;
     }
 
+    //Functions that load dalgona
     loadSquare(){
         for(var i=1; i<10; i++){
             var url = '../Graphic/model/sugarRec*.gltf'
-            if(i==9)setTimeout(() => this.loadPiece(url.replace('*',String(9))), 300);
-            else this.loadPiece(url.replace('*',String(i)));
+            if(i==9)this.loadPiece(url.replace('*',String(9)),true);
+            else this.loadPiece(url.replace('*',String(i))),false;
         }
     }
 
     loadTriangle(){
         for(var i=1; i<5; i++){
             var url = '../Graphic/model/sugarTri*.gltf'
-            if(i==4)setTimeout(() => this.loadPiece(url.replace('*',String(4))), 300);
-            else this.loadPiece(url.replace('*',String(i)));
+            if(i==4)this.loadPiece(url.replace('*',String(4)),true);
+            else this.loadPiece(url.replace('*',String(i)),false);
         }
     }
     
     loadPentagon(){
         for(var i=1; i<7; i++){
             var url = '../Graphic/model/sugarpoly*.gltf'
-            if(i==6)setTimeout(() => this.loadPiece(url.replace('*',String(6))), 300);
-            else this.loadPiece(url.replace('*',String(i)));
+            if(i==6)this.loadPiece(url.replace('*',String(6)),true);
+            else this.loadPiece(url.replace('*',String(i)),false);
         }
     }
 
+    //Particle, a function that pre-loads effects when clicked
     loadParticle(){
         for(var i=0; i<10; i++){
             var url = '../Graphic/model/sugarRec1.gltf'
@@ -99,32 +119,40 @@ class Game{
         }
     }
     
-    loadPiece(url){
+    //A function that effectively loads pieces of the model
+    //The path of the model to be loaded, and whether this model is MainShape or boolean value is received
+    //After loading, save the objectId of the loaded model and save the object in the mainShapeObject if isMainShape is true.
+    loadPiece(url, isMainShape){
         this.loader.load(url, (gltf)=>{
             gltf.scene.children[0].scale.set(10,10,10);
             this._scene.add(gltf.scene);
-            this.rectangle.push(gltf.scene.children[0].id);
-            this.mainShapeObject = gltf.scene.children[0];
+            this.objectId.push(gltf.scene.children[0].id);
+            if(isMainShape)this.mainShapeObject = gltf.scene.children[0];
         },  undefined, function (error) {
             console.log(error);
         });
     }
 
+    //Functions for click events
+    //If the clicked object is a Dalgona piece rather than a mainShapeObject, save the object in the animationObject to be the target of the animation functions
+    //And in that process, the various vectors required for animation are also calculated and stored
     onClick() {
         event.preventDefault();
-        var mouse = new THREE.Vector2();
-        var raycaster = new THREE.Raycaster();
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, this._camera);
-        var intersects = raycaster.intersectObjects(this._scene.children, true);
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this._camera);
+        var intersects = this.raycaster.intersectObjects(this._scene.children, true);
+
         if (intersects.length > 0) {
             var clickedPosition = new THREE.Vector3(intersects[0].point.x,intersects[0].point.y,intersects[0].point.z);
             var cameraPosition = new THREE.Vector3(this._camera.position.x,this._camera.position.y,this._camera.position.z);
     
+            //In order to make the clicked Dalgona piece fly in the direction we're looking at, we calculate the vector of the direction to move by calculating the camera vector and click position vector
             var vectorToMove = clickedPosition.clone().sub(cameraPosition).normalize().multiplyScalar(20);
             var objectToMove = intersects[0].object;
     
+            //If it is already in the animation object, change readyIn to true and enter the animation object again to prevent the animation from running several times
             this.animationObject.forEach((object) =>{if(objectToMove.id == object.id)this.alreadyIn = true;});
             if(!this.alreadyIn && !(objectToMove.id == this.mainShapeObject.id)){
                 this.prepareParticle(clickedPosition);
@@ -135,19 +163,48 @@ class Game{
             this.alreadyIn = false;
         }
 
-        if(this.rectangle.length == 1){
+        //If a click event occurred when finalAnimation was running, call exit and change the ended to true to notify the outside
+        if(this.objectId.length == 1){
             this.exit();
             this.ended = true;
         }
     }
 
+    //Functions for hover events
+    //If an object is detected using raycaster, make only the Dalgona pieces translucent, not the mainShapeObject
+    //It also makes the pieces that the mouse is not pointing opaque again
+    onMove() {
+        event.preventDefault();
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this._camera);
+        var intersects = this.raycaster.intersectObjects(this._scene.children, true);
+
+        this._scene.traverse((object)=>{
+            if(object.isMesh && this.objectId.includes(object.id))object.material.opacity = 1;
+        });
+
+        if (intersects.length > 0 && intersects[0].object.id != this.mainShapeObject.id && this.objectId.includes(intersects[0].object.id)) {
+            intersects[0].object.material.transparent = true;
+            intersects[0].object.material.format = THREE.RGBAFormat
+            intersects[0].object.material.opacity = 0.5;
+        }
+    }
+
+    //Almost all animation functions below this are executed by navigating through the animationObject array
+    //So your mouse click is so fast that even if you click several pieces at a very short interval, they'll all run in parallel
+    //Also, the object in the animation object deletes only when the moveAnimation below is finished, so all animations are repeated until the end of the moveAnimation
+
+    //Move the animationObject toward the animationMovingVector until it reaches the animationDestinationVector.
+    //If it arrives, erase all animation data related to the object
     moveAnimation() {
         this.animationObject.forEach((object,index) =>{
             if (!this.animationDestinationVector[index].equals(object.clone().position.ceil())) {
                 object.position.add(this.animationMovingVector[index]);
             }else{
                 this.animationObject[index].visible=false;
-                this.rectangle = this.rectangle.filter((element) => element != this.animationObject[index].id);
+                this.objectId = this.objectId.filter((element) => element != this.animationObject[index].id);
                 this.animationObject.splice(index,1);
                 this.animationDestinationVector.splice(index,1);
                 this.animationMovingVector.splice(index,1);
@@ -156,6 +213,7 @@ class Game{
         });
     }
 
+    //Rotate the animationObject
     rotateAnimation() {
         this.animationObject.forEach((object) =>{
             var box = new THREE.Box3().setFromObject( object );
@@ -169,20 +227,21 @@ class Game{
         });
     }
     
+    //Make the animationObject more and more transparent
     fadeOutAnimation() {
         this.animationObject.forEach((object) =>{
-            object.material.transparent = true;
             object.material.opacity -= 0.03;
-            object.material.format = THREE.RGBAFormat
         });
     }
     
-    finallAnimation() {
+    //When the function is excuted, the camera is fixed and the mainShapeObject is rotated to show
+    finalAnimation() {
         this._camera.position.set(0,30,0);
         this._camera.rotation.set(-1.5,0,0);
         this.mainShapeObject.rotation.z -= 0.1;
     }
     
+    //Function that receives clickedPosition as a parameter and copies the preloaded particle near the coordinates you clicked on
     prepareParticle(clickedPosition) {
         var particle = [];
         this.particleObject.forEach((object) =>{
@@ -196,6 +255,8 @@ class Game{
         this.animationParticle.push(particle);
     }
     
+    //A function that randomly scatters copied particles near the pre-click location
+    //It becomes invisible quickly because the transparency is gradually decreasing
     particleAnimation() {
         this.animationObject.forEach((list,index) =>{
             var cameraPosition = new THREE.Vector3(this._camera.position.x,this._camera.position.y,this._camera.position.z).normalize();
@@ -212,6 +273,8 @@ class Game{
         });
     }
 
+    //Function to end animation and clear the scene
+    //Within this program, it is executed only when the final animation is being output and clicking anywhere.
     exit(){
         cancelAnimationFrame(this.frameId);
         while(this._scene.children.length > 0){
@@ -219,16 +282,19 @@ class Game{
         }
     }
 
+    //A rendering function that outputs all animations and calls requestAnimationFrame
+    //If there is only one object left (= only mainShapeObject left), output the finalAnimation
     animate() {
         this._renderer.render(this._scene,this._camera);
         this.moveAnimation();
         this.rotateAnimation();
         this.fadeOutAnimation();
         this.particleAnimation();
-        if(this.rectangle.length == 1)this.finallAnimation();
+        if(this.objectId.length == 1)this.finalAnimation();
         this.frameId = requestAnimationFrame(this.animate.bind(this));
     }
 
+    //Function that resizes in response to resize of the web browser
     resize(){
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -252,6 +318,8 @@ class Game{
         }
     }
     
+    //A function that sets the background at random
+    //Within the range of numOfBackground, randomly select the path in the backgroundList and designate it as a background
     setupBackground() {
         //https://www.humus.name/index.php?page=Textures&start=56
         var backgroundList = [
