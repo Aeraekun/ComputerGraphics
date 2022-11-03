@@ -12,6 +12,7 @@ window.onload = function init()
 	const renderer = new THREE.WebGLRenderer({ canvas });
     renderer.setSize(canvas.width, canvas.height);
 
+    // scene2 = choose dalgona
     const scene2 = new THREE.Scene();
     scene2.background = new THREE.Color(0x000000);
 
@@ -30,12 +31,14 @@ window.onload = function init()
 	Game = new Game(canvas,camera,renderer);
 
 	// use click event listener
-	// use once:ture to execute one time
+	// use once:ture to execute one time to avoid load repeat
 	canvas.addEventListener("mousedown", function(event){
 		var t = vec2(2*event.clientX/canvas.width-1, 2*(canvas.height-event.clientY)/canvas.height-1);
 		// if click play button
+		// use position of play button
 		if (t[0] <= 0.613 && t[0] >= 0.185 && t[1] <= -0.069 && t[1] >= -0.198)
 		{
+			//load gltf loader
 			const loader = new THREE.GLTFLoader();
 			
 			//scene2 load
@@ -47,32 +50,34 @@ window.onload = function init()
 			}, undefined, function (error) {
 				console.error(error);
 			});
-
+			//render choose models scene
 			render1();
-
+			// use click event
+			// use click position
 			canvas.addEventListener("mousedown", function(event){
 				var t = vec2(2*event.clientX/canvas.width-1, 2*(canvas.height-event.clientY)/canvas.height-1);
-				// if click square
+				// if click square position
 				if (t[0] <= 0.23 && t[0] >= -0.217 && t[1] <= 0.51 && t[1] >= 0.0615)
 				{
+					// load game class as sqaure
 					Game.loadSquare();
-
+					// animate game
 					Game.animate();
 				}
-				// if click triangle
+				// if click triangle position
 				else if(t[0] <= -0.115 && t[0] >= -0.529 && t[1] <= -0.22 && t[1] >= -0.68)
 				{
-					
+					// load game class as triangle
 					Game.loadTriangle();
-
+					// animate game
 					Game.animate();
 				}
-				// if click Pentagon
+				// if click Pentagon position
 				else if(t[0] <= 0.618 && t[0] >= 0.273 && t[1] <= -0.29 && t[1] >= -0.654)
 				{
-					
+					// load game class as pentagon
 					Game.loadPentagon();
-
+					// animate game
 					Game.animate();
 				}
 				else ;
@@ -81,6 +86,7 @@ window.onload = function init()
 		else ;
 	},{once:true});
 
+	// render choose scene
 	function render1() {
         renderer.render(scene2, camera);
         requestAnimationFrame(render1);
