@@ -161,8 +161,8 @@ class Game{
 
         //If a click event occurred when finalAnimation was running, call exit and change the ended to true to notify the outside
         if(this.objectId.length == 1){
-            this.exit();
             document.getElementById('modal').style.visibility = 'hidden';
+            this.exit();
         }
     }
 
