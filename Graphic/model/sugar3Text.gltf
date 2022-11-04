@@ -1,0 +1,258 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v3.3.32",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0,
+                1
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "\ud3c9\uba74",
+            "rotation" : [
+                0,
+                -0.0826556533575058,
+                0,
+                0.9965781569480896
+            ]
+        },
+        {
+            "mesh" : 1,
+            "name" : "\ud14d\uc2a4\ud2b8",
+            "scale" : [
+                0.20947396755218506,
+                0.20947396755218506,
+                0.20947396755218506
+            ],
+            "translation" : [
+                -0.7140096426010132,
+                0,
+                -0.6883894205093384
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "\ub9e4\ud14c\ub9ac\uc5bc",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "\ub9e4\ud14c\ub9ac\uc5bc.001",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.8000000715255737,
+                    0.30640724301338196,
+                    0.030825942754745483,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "\ud3c9\uba74",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2,
+                        "COLOR_0" : 3
+                    },
+                    "indices" : 4,
+                    "material" : 0
+                }
+            ]
+        },
+        {
+            "name" : "\ud14d\uc2a4\ud2b8",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 5,
+                        "NORMAL" : 6,
+                        "TEXCOORD_0" : 7
+                    },
+                    "indices" : 8,
+                    "material" : 1
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "sampler" : 0,
+            "source" : 0
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "sugarTe2",
+            "uri" : "texture/sugarTe2.jpg"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 368,
+            "max" : [
+                0.6227266192436218,
+                3.729584568645805e-05,
+                0.6165966987609863
+            ],
+            "min" : [
+                -0.3783107399940491,
+                -0.04680338129401207,
+                -0.611823558807373
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 368,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 368,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5126,
+            "count" : 368,
+            "normalized" : false,
+            "type" : "VEC4"
+        },
+        {
+            "bufferView" : 4,
+            "componentType" : 5123,
+            "count" : 684,
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5126,
+            "count" : 8770,
+            "max" : [
+                7.302000522613525,
+                0.029999999329447746,
+                0.23000000417232513
+            ],
+            "min" : [
+                0.04800000041723251,
+                -0.029999999329447746,
+                -0.6910000443458557
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 6,
+            "componentType" : 5126,
+            "count" : 8770,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 7,
+            "componentType" : 5126,
+            "count" : 8770,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 8,
+            "componentType" : 5123,
+            "count" : 15948,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 4416,
+            "byteOffset" : 0,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 4416,
+            "byteOffset" : 4416,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 2944,
+            "byteOffset" : 8832,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 5888,
+            "byteOffset" : 11776,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 1368,
+            "byteOffset" : 17664,
+            "target" : 34963
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 105240,
+            "byteOffset" : 19032,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 105240,
+            "byteOffset" : 124272,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 70160,
+            "byteOffset" : 229512,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 31896,
+            "byteOffset" : 299672,
+            "target" : 34963
+        }
+    ],
+    "samplers" : [
+        {
+            "magFilter" : 9729,
+            "minFilter" : 9987
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 331568,
+            "uri" : "sugar3Text.bin"
+        }
+    ]
+}
