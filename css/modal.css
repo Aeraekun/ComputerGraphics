@@ -1,0 +1,37 @@
+﻿#gl-canvas {
+    background: url(../Graphic/startBackground1.png) center center / cover no-repeat;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+}
+
+#modal {
+    position: absolute;
+    width: 300px;
+    z-index: 1;
+    height: 250px;
+
+    margin: 0 auto;
+    visibility: hidden;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+@font-face {
+    font-family: 'comic';
+    src: url("../css/dpcomic.ttf") format("truetype");
+    font-weight: 400;
+}
+
+.modalT {
+    font-family: "comic";
+    color: white;
+    font-size: 5rem;
+    margin: 0 auto;
+    left: 5%;
+    top: 50%;
+    position: relative;
+}
