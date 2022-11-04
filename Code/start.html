@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link media="screen" rel="stylesheet" href="../css/modal.css" type="text/css" />
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 vPosition;
         uniform vec4 vColor;
@@ -21,22 +22,16 @@
     <script type="text/javascript" src="../Common/initShaders.js"></script>
     <script type="text/javascript" src="../Common/MV.js"></script>
     <script type="text/javascript" src="../js/three.min.js"></script>
-    <script type="text/javascript" src="../js/orbitcontrols.js"></script>	
-    <script type="text/javascript" src="../js/GLTFLoader.js"></script>	
-    <script type="text/javascript" src="game.js"></script>	
+    <script type="text/javascript" src="../js/orbitcontrols.js"></script>
+    <script type="text/javascript" src="../js/GLTFLoader.js"></script>
+    <script type="text/javascript" src="game.js"></script>
     <script type="text/javascript" src="start.js"></script>
-    <style>
-        #gl-canvas {
-            background: url(../Graphic/startBackground1.png) center center / cover no-repeat;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+
 </head>
 <body>
+    <div id="modal">
+        <p class="modalT">SUCCESS</p>
+    </div>
     <canvas id="gl-canvas" width="512" height="512">
 </body>
 </html>
