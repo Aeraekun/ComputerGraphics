@@ -1,3 +1,4 @@
+/*
 window.onload = function init(){
 	const canvas = document.getElementById( "gl-canvas" );
 	canvas.width = window.innerWidth;
@@ -16,22 +17,16 @@ window.onload = function init(){
 
     Game.animate();
 }
+*/
 
 //Encapsulated game logic class
 class Game{
 
-	//Receive Canvas, Camera, and Render used in existing programs as parameters
-    constructor(canvas,camera,renderer){
+	//Receive Camera, and Render used in existing programs as parameters
+    constructor(camera,renderer){
         //Store the augments inside the class
-        this._canvas = canvas;
         this._camera = camera;
-        this._camera.position.y = 30;
-        this._camera.rotation.x = -1.5;
         this._renderer = renderer;
-
-        //Add listener, pointmove is later used for hover events using raycaster
-        this._renderer.domElement.addEventListener('pointerdown', this.onClick.bind(this));
-        this._renderer.domElement.addEventListener('pointermove', this.onMove.bind(this));
 
         //Scene is declared separately inside the class to avoid touching the scene used outside
         const scene = new THREE.Scene();
@@ -45,18 +40,19 @@ class Game{
         this.controls.update();
 
 	    this.hlight = new THREE.AmbientLight (0x404040,10);
-	    this._scene.add(this.hlight);
 
         //Variables
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
 
+        this.onClick = this.onClick.bind(this);
+        this.onMove = this.onMove.bind(this);
+
         this.frameId;
+        this.mainShapeObject;
 
         this.particleObject = [];
-
         this.objectId = [];
-        this.mainShapeObject;
 
         //The animationObject stores the object for which the animation should occur
         //The animationDestinationVector stores the vector where the animationObject should finally arrive
@@ -70,8 +66,8 @@ class Game{
         this.alreadyIn = false;
 
         //Variable that allow external confirmation that this game is over
-        this.stoped = false;
-
+        this.ended = false;
+        
         //Basic Preparation
         this.loadParticle();
         this.setupBackground();
@@ -166,7 +162,6 @@ class Game{
         //If a click event occurred when finalAnimation was running, call exit and change the ended to true to notify the outside
         if(this.objectId.length == 1){
             this.exit();
-            this.ended = true;
         }
     }
 
@@ -275,22 +270,44 @@ class Game{
 
     //Function to end animation and clear the scene
     //Within this program, it is executed only when the final animation is being output and clicking anywhere.
+    //In the next game, reset the non-recyclable parts and remove the listener
     exit(){
+        this.particleObject = [];
+        this.objectId = [];
+        this.controls.enabled = false;
+        this._renderer.domElement.removeEventListener('pointerdown', this.onClick);
+        this._renderer.domElement.removeEventListener('pointermove', this.onMove);
         cancelAnimationFrame(this.frameId);
+        this.ended = true;
         while(this._scene.children.length > 0){
             this._scene.remove(this._scene.children[0]);
         }
     }
 
+    //Function that starts a game
+    //Add a listener to start the game, set up some settings, and call animate
+    start(){
+        this._camera.position.set(0,30,0);
+        this._camera.rotation.set(-1.5,0,0);
+
+	    this._scene.add(this.hlight);
+
+        //Add listener, pointmove is later used for hover events using raycaster
+        this._renderer.domElement.addEventListener('pointerdown', this.onClick);
+        this._renderer.domElement.addEventListener('pointermove', this.onMove);
+        this.controls.enabled = true;
+        this.ended = false;
+        this.animate();
+    }
+
     //A rendering function that outputs all animations and calls requestAnimationFrame
     //If there is only one object left (= only mainShapeObject left), output the finalAnimation
     animate() {
-        this._renderer.render(this._scene,this._camera);
         this.moveAnimation();
         this.rotateAnimation();
         this.fadeOutAnimation();
         this.particleAnimation();
-        if(this.objectId.length == 1)this.finalAnimation();
+        if(this.objectId.length == 1 && typeof this.mainShapeObject != 'undefined')this.finalAnimation();
         this.frameId = requestAnimationFrame(this.animate.bind(this));
     }
 
