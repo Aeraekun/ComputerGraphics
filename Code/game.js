@@ -162,6 +162,7 @@ class Game{
         //If a click event occurred when finalAnimation was running, call exit and change the ended to true to notify the outside
         if(this.objectId.length == 1){
             this.exit();
+            document.getElementById('modal').style.visibility = 'hidden';
         }
     }
 
@@ -234,6 +235,8 @@ class Game{
         this._camera.position.set(0,30,0);
         this._camera.rotation.set(-1.5,0,0);
         this.mainShapeObject.rotation.z -= 0.1;
+        //modal
+        document.getElementById('modal').style.visibility = 'visible';
     }
     
     //Function that receives clickedPosition as a parameter and copies the preloaded particle near the coordinates you clicked on
