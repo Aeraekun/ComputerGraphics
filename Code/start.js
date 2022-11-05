@@ -15,9 +15,9 @@ window.onload = function init()
     var scene;
     var theta=0;
 
-    const value={
-        distance : 50,
-        speed:0.05
+    var value = new function(){
+        this.distance = 50;
+        this.speed = 0.5;
     };
     // mainScene = choose dalgona
     const mainScene = new THREE.Scene();
@@ -43,7 +43,7 @@ window.onload = function init()
 
     const gui=new dat.GUI();
     gui.add(value,'distance',10,100);
-    gui.add(value,'speed',0.05,1);
+    gui.add(value,'speed',0.00,1);
     gui.hide();
 
 	// render choose scene
@@ -53,24 +53,31 @@ window.onload = function init()
         if(gameStarted == true){
             gui.show();
             theta+=value.speed;
-            if(r1>=4)camera.position.x = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
-            else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
-            if(r2>=5)camera.position.y = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
-            else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
-            if(r3>=6)camera.position.z = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
-            else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
-            camera.lookAt( Game._scene.position );
-            camera.updateMatrixWorld();
+            console.log(value.speed);
+            if(value.speed != 0){
+                if(r1>=4)camera.position.x = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
+                else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
+                if(r2>=5)camera.position.y = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
+                else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
+                if(r3>=6)camera.position.z = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
+                else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
+                camera.lookAt( Game._scene.position );
+                camera.updateMatrixWorld();
+            }
+            if(Game.objectId.length == 1 && typeof Game.mainShapeObject != 'undefined'){
+                value.speed = 0;
+                gui.hide();
+            }
             scene = Game._scene;
         }
 
         else {
-            gui.hide();
             camera.position.x = 0;
             camera.position.y = 30;
             camera.position.z = 0;
             camera.rotation.x = -1.5;
             camera.lookAt( Game._scene.position );
+            camera.updateMatrixWorld();
             scene = mainScene;
         }
         
@@ -80,8 +87,8 @@ window.onload = function init()
             gameStarted = false;
             Game.loadParticle();
             Game.setupBackground();
-            
         }
+
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     }
@@ -125,6 +132,7 @@ window.onload = function init()
 				Game.start();
 
                 gameStarted = true;
+                value.speed = 0.5;
 			}
 			// if click triangle position
 			else if(t[0] <= -0.115 && t[0] >= -0.529 && t[1] <= -0.22 && t[1] >= -0.68)
@@ -138,6 +146,7 @@ window.onload = function init()
 				Game.start();
                 
                 gameStarted = true;
+                value.speed = 0.5;
 			}
 			// if click Pentagon position
 			else if(t[0] <= 0.618 && t[0] >= 0.273 && t[1] <= -0.29 && t[1] >= -0.654)
@@ -151,6 +160,7 @@ window.onload = function init()
 				Game.start();
                 
                 gameStarted = true;
+                value.speed = 0.5;
 			}
 			else ;
 		};
