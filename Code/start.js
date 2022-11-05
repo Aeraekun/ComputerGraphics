@@ -53,7 +53,6 @@ window.onload = function init()
         if(gameStarted == true){
             gui.show();
             theta+=value.speed;
-            console.log(value.speed);
             if(value.speed != 0){
                 if(r1>=4)camera.position.x = value.distance * Math.sin( THREE.MathUtils.degToRad( theta ) );
                 else camera.position.x = value.distance * Math.cos( THREE.MathUtils.degToRad( theta ) );
