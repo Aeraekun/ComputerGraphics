@@ -158,7 +158,6 @@ class Game{
             }
             this.alreadyIn = false;
         }
-
         //If a click event occurred when finalAnimation was running, call exit and change the ended to true to notify the outside
         if(this.objectId.length == 1){
             document.getElementById('modal').style.visibility = 'hidden';
@@ -236,6 +235,7 @@ class Game{
         this._camera.rotation.set(-1.5,0,0);
         this.mainShapeObject.rotation.z -= 0.1;
         //modal
+        document.getElementById("modalt").textContent = "SUCCESS";
         document.getElementById('modal').style.visibility = 'visible';
     }
     

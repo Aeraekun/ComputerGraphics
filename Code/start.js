@@ -49,7 +49,6 @@ window.onload = function init()
 	// render choose scene
     //If you are in the game, render the scene of the game, or the main scene
 	function render() {
-        
         // After the game starts, the movement of the camera is determined by the user's designated value and random value.
         if(gameStarted == true){
             gui.show();
