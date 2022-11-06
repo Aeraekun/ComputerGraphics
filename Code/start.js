@@ -71,6 +71,7 @@ window.onload = function init()
         }
 
         else {
+            gui.hide();
             camera.position.x = 0;
             camera.position.y = 30;
             camera.position.z = 0;
